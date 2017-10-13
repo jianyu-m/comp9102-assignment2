@@ -2,6 +2,7 @@ from math import sqrt
 
 import numpy
 import numpy.linalg as lin
+import time
 from rtree import index
 
 
@@ -14,21 +15,26 @@ def process_input():
 def query(records, v, avg, tree, qux_cor, k):
 
     br = numpy.dot(qux_cor - avg, numpy.transpose(v))[:k]
-    nearest = list(tree.nearest(numpy.concatenate([br, br])))[0]
+    nearest_list = list(tree.nearest(numpy.concatenate([br, br])))
+    DD = sum((records[nearest_list[0]] - qux_cor) ** 2)
+    DD_x = nearest_list[0]
+    for nearest in nearest_list:
+        DD_tmp = sum((records[nearest] - qux_cor) ** 2)
+        if DD_tmp < DD:
+            DD = DD_tmp
+            DD_x = nearest
 
-    D_2 = sum((records[nearest] - qux_cor) ** 2)
-    d_x = nearest
+    d_x = DD_x
 
-    D = sqrt(D_2)
-
-    min_d = D_2
-
-    for idx in idxkd.intersection(numpy.concatenate([br - D, br + D])):
+    D = sqrt(DD)
+    min_d = DD
+    print(D)
+    touch_records = idxkd.intersection(numpy.concatenate([br - D, br + D]))
+    for idx in touch_records:
         d = sum((records[idx] - qux_cor) ** 2)
         if d < min_d:
             min_d = d
             d_x = idx
-
     return d_x
 
 
@@ -44,7 +50,7 @@ def query_linear(records, qux_cor):
 
 
 if __name__ == "__main__":
-    k = 10
+    k = 30
     mat = process_input()
     min_mat = numpy.min(mat, 0)
     max_mat = numpy.max(mat, 0)
@@ -71,11 +77,12 @@ if __name__ == "__main__":
         datasets.append(rec)
 
     print("start queries")
+    start = time.time()
     for idx, b_r in enumerate(datasets):
-        print(idx)
         r_s = query(records, v, avg, idxkd, b_r, k)
+    print(time.time() - start)
 
+    start = time.time()
     for idx, b_r in enumerate(datasets):
-        print(idx)
         r_l = query_linear(records, b_r)
-
+    print(time.time() - start)
