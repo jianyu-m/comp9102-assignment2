@@ -3,6 +3,7 @@ from math import sqrt
 import numpy
 import numpy.linalg as lin
 import time
+from matplotlib.mlab import PCA
 from rtree import index
 
 
@@ -12,23 +13,27 @@ def process_input():
     return mat.reshape((l, 33))[:, 1:]
 
 
-def query(records, v, avg, tree, qux_cor, k):
+def query_multi(records, v, avg, tree, qux_cor, k):
+    br = numpy.dot(qux_cor - avg, numpy.transpose(v))[:k]
+    D = numpy.inf
 
+
+def query_two(records, v, avg, tree, qux_cor, k):
     br = numpy.dot(qux_cor - avg, numpy.transpose(v))[:k]
     nearest_list = list(tree.nearest(numpy.concatenate([br, br])))
     DD = sum((records[nearest_list[0]] - qux_cor) ** 2)
     DD_x = nearest_list[0]
+    count = 0
     for nearest in nearest_list:
         DD_tmp = sum((records[nearest] - qux_cor) ** 2)
+        count += 1
         if DD_tmp < DD:
             DD = DD_tmp
             DD_x = nearest
-
     d_x = DD_x
 
     D = sqrt(DD)
     min_d = DD
-    print(D)
     touch_records = idxkd.intersection(numpy.concatenate([br - D, br + D]))
     for idx in touch_records:
         d = sum((records[idx] - qux_cor) ** 2)
@@ -50,7 +55,7 @@ def query_linear(records, qux_cor):
 
 
 if __name__ == "__main__":
-    k = 30
+    k = 10
     mat = process_input()
     min_mat = numpy.min(mat, 0)
     max_mat = numpy.max(mat, 0)
@@ -79,7 +84,7 @@ if __name__ == "__main__":
     print("start queries")
     start = time.time()
     for idx, b_r in enumerate(datasets):
-        r_s = query(records, v, avg, idxkd, b_r, k)
+        r_s = query_two(records, v, avg, idxkd, b_r, k)
     print(time.time() - start)
 
     start = time.time()
