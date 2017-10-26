@@ -7,32 +7,41 @@
 \begin{document}
 \section{Problem Definition}
 In this assignment, you are required to implement and benchmark nearest
-neighbor similarity queries using
+neighbour similarity queries using
 the two-step and multi-step similarity search
 algorithms. The algorithms should take as input a query
-vector q and should compute the nearest neighbor p of q.
+vector q and should compute the nearest neighbour p of q.
 
 \section{Design and Implementation}
 The algorithm has three steps. First, we do a Principle Component Analysis (PCA)
 on the dataset. Second, we construct a R-Tree with the dataset in the principle
-space. At last, we run the two step and multi-step nearest neighbor search.
+space. At last, we run the two step and multi-step nearest neighbour search.
 
 \subsection{Principle Component Analysis (PCA)}
-For a dataset array $X_{nxd}$, we first center $X$ and get $X'$. Then,
+For a dataset array $X_{nxd}$, we first centre $X$ and get $X'$. Then,
 we run a SVD on $X'$, so that $X' = USV^T$. We get the principle component
 $G = U_{n*k}S_{k*k}$. We then insert $G$ into the R-Tree. For a query $q$,
 we get its corresponding vector $q'$ by $q' = qV_{n*k}$.
 
 
-\subsection{Nearest Neighbor Search}
-To find the nearest neighbor for a query $q'$, we conduct a two-step and a multi-step
-nearest neighbor search. For two-step search, we use the $D$ we calculate in
+\subsection{Nearest Neighbour Search}
+To find the nearest neighbour for a query $q'$, we conduct a two-step and a multi-step
+nearest neighbour search. For two-step search, we use the $D$ we calculate in
 the reduced space and do a range search of [$q' - D$, $q' + D$]. After that, we
 get the final result by comparing all data in the range search.
 
 For the multi-step search, we do incremental R-Tree queries until the distance
 in reduced space
 is larger than the distance in the original space.
+For the two-step neighbour search, we use $D$ as the upper bound distance between
+the query $q$ and the neighbour $p$ in reduced space. Suppose we find the nearest
+neighbour $ |g' - q'| = min(|p' - q'|)$ in reduced space and $y$ is the nearest neighbour
+of $q$. Then, we need to prove that $d(g, q) \geq d(y', q')$. \\
+\textbf{Proof} If $d(g, q) \geq d(y', q')$ is not fulfilled, then $d(g, q) < d(y', q')$.
+We have
+$|g - q||V_{dk}| = |g' - q'| < |y' - q'||V_{dk}|$
+then $|g' - q'| < min(|y' - q'||V_{dk}|) = |g' - q'||V_{dk}|$, but
+$|V_{dk}| \leq 1$. Thus, we have $d(g, q) \geq d(y', q')$.
 
 \subsection{Benchmark}
 Evaluation of the algorithm is focused of the time of constructing the R-Tree
@@ -66,10 +75,10 @@ used for comparison. The result is showed in Table \ref{result}.
 \end{table}
 
 Table~\ref{result} shows that linear search outperforms two-step and multi-step
-nearest neighbor search when k is less than 25. This is because the principle
+nearest neighbour search when k is less than 25. This is because the principle
 component of $X$ get 99\% information of the original $X$ when k is larger than
 25. For two-step nearest
-neighbor search, the distance $D$ is not a good estimation of the reduced
+neighbour search, the distance $D$ is not a good estimation of the reduced
 dimension, causing a bad performance.
 
 \end{document}
